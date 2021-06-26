@@ -1,0 +1,2 @@
+rootProject.name = "SegurosCirucs"
+include ':app'
