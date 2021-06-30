@@ -11,9 +11,14 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.cacao.seguroscirucs.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.vivebamba.client.apis.StoreApi
+import com.vivebamba.client.models.Product
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 
 class MainActivity : AppCompatActivity() {
 
@@ -64,13 +69,24 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         lifecycleScope.launchWhenCreated {
             withContext(Dispatchers.IO) {
-                val products = StoreApi().storeProductsGet()
+                val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+                val jsonAdapter: JsonAdapter<Product> = moshi.adapter(Product::class.java)
+                val products: List<Product> = StoreApi().storeProductsGet()
+                val jsArray = JSONArray(products)
+                val productList = ArrayList<Product>()
+                for (i in 0 until jsArray.length()) {
+                    val jsonObject = jsArray.getJSONObject(i)
+                    val  product: Product? =jsonAdapter.fromJson(jsonObject.toString())
+                    if (product is Product) {
+                        productList.add(product)
+                    }
+                }
 
                 println()
                 println()
                 println()
                 println("POR acaaaaa")
-                println(products)
+                println(productList)
                 withContext(Dispatchers.Main) {
                     //fillList(products.toList())
                 }
